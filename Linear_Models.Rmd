@@ -63,6 +63,34 @@ fit %>%
   knitr::kable(digits = 3)
 ```
 
+Look at other summaries:
+
+```{r}
+fit %>%
+  broom::glance()
+
+# Glance is going to extract the quick summaries related to mdel fit. 
+# will extract the most commonly used information from model fit
+```
+Be careful with factors...
+
+```{r}
+nyc_airbnb = 
+  nyc_airbnb %>% 
+  mutate(boro = fct_infreq(boro),
+         room_type = fct_infreq(room_type))
+# First converting boro into a factor and is putting it in order of frequency rather than in alphabetical order.# Most common room_type will be reference category.
+
+fit = lm(price ~ stars + boro, data = nyc_airbnb)
+
+fit %>%
+  broom::tidy()
+
+nyc_airbnb %>% count(boro)
+
+# Now rather than be compared to the Bronx, Manhattan is now the reference category.
+```
+
 
 
 
