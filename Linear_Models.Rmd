@@ -86,10 +86,52 @@ fit = lm(price ~ stars + boro, data = nyc_airbnb)
 fit %>%
   broom::tidy()
 
-nyc_airbnb %>% count(boro)
-
-# Now rather than be compared to the Bronx, Manhattan is now the reference category.
+# Now rather than be compared to the Bonx, Manhattan is now the reference category.
 ```
+
+### Diagnostics
+
+```{r}
+fitted.values(fit)
+# Don't ever use this
+
+
+modelr::add_residuals(nyc_airbnb, fit) %>%
+  ggplot(aes(x = boro, y =resid)) + geom_boxplot()
+
+#add_residulas - 1st argument into the function is the dataset thatI want to operate on
+# 2nd argument is the model to add residuals for
+
+modelr::add_residuals(nyc_airbnb, fit) %>%
+  ggplot(aes(x = stars, y =resid)) + geom_point()
+
+
+modelr::add_predictions(nyc_airbnb, fit) %>%
+  ggplot(aes(x = stars, y =pred, color = boro)) + geom_point()
+# This shows the fitted values that go along with this thing; not the residuals any more
+```
+
+### Testing
+```{r}
+# What is the effect of stars and is it statistically significant?
+  
+fit %>%
+  broom::tidy()
+```
+
+Compare nested models
+
+```{r}
+fit_null = lm(price ~ stars + boro, data = nyc_airbnb)
+
+fit_alt = lm(price ~ stars + boro + room_type, data  = nyc_airbnb)
+
+# 
+
+anova(fit_null, fit_alt) %>%
+  broom::tidy()
+```
+
 
 
 
