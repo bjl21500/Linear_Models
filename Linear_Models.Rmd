@@ -31,4 +31,38 @@ nyc_airbnb =
   select(price, stars, boro, neighborhood, room_type)
 ```
 
+Fit a linear model for price as an outcome.
+
+```{r}
+fit = lm(price ~ stars + boro, data = nyc_airbnb)
+
+# Price is my outcome
+# stars and boro is my 2 predictors  (One main effect for stars, one main effect for boro)
+```
+
+Look at some summaries.
+
+```{r}
+summary(fit)
+summary(fit)$coef
+coef(fit)
+fitted.values(fit)
+```
+
+Look at better summaries.
+```{r}
+broom::tidy(fit)
+# Spits this in a manner that is a dataframe.
+# Can do some data manipulation if I want.
+
+
+fit %>% 
+  broom::tidy() %>% 
+  select(term, estimate, p.value) %>% 
+  mutate(term = str_replace(term, "^boro", "Boro: ")) %>% 
+  knitr::kable(digits = 3)
+```
+
+
+
 
