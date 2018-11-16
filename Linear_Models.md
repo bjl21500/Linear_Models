@@ -20657,3 +20657,52 @@ nest_lm_res =
   select(-data) %>% 
   unnest()
 ```
+
+Let's go nuts!
+
+``` r
+manhattan_airbnb =
+  nyc_airbnb %>% 
+  filter(boro == "Manhattan") 
+
+manhattan_nest_lm_res =
+  manhattan_airbnb %>% 
+  group_by(neighborhood) %>% 
+  nest() %>% 
+  mutate(models = map(data, ~lm(price ~ stars + room_type, data = .x)),
+         models = map(models, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest()
+
+manhattan_nest_lm_res %>% 
+  filter(str_detect(term, "room_type")) %>% 
+  ggplot(aes(x = neighborhood, y = estimate)) + 
+  geom_point() + 
+  facet_wrap(~term) + 
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))
+```
+
+![](Linear_Models_files/figure-markdown_github/unnamed-chunk-12-1.png)
+
+``` r
+# The str_detect function specifically selects the observations in term that are "rrom_type"
+```
+
+baltimore\_df = read\_csv("data/homicide-data.csv") %&gt;% filter(city == "Baltimore") %&gt;% mutate(resolved = as.numeric(disposition == "Closed by arrest"), victim\_age = as.numeric(victim\_age), victim\_race = fct\_relevel(victim\_race, "White")) %&gt;% select(resolved, victim\_age, victim\_race, victim\_sex)
+
+Only looking at Baltimore
+=========================
+
+Convert age catefory to numeric variable race cateogry is making White race as default category
+
+glm(resolved ~ victim\_age + victim\_race, data = baltimore,df, family = binomial())
+
+resolved is the outcome
+=======================
+
+data is the baltimore\_df the family argument - tell R that what its fitting is a binomial distribution.
+
+fit\_logistic %&gt;% broom::tidy() %&gt;% mutate(OR = boot::inv.logit(estimate)) %&gt;% knitr::kable(digits = 3)
+
+This makes an odds ratio from thebeta estimate
+==============================================
