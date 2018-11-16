@@ -20606,3 +20606,54 @@ anova(fit_null, fit_alt) %>%
 ``` r
 # Can only use ANOVA to compare nested models
 ```
+
+### Nested data
+
+``` r
+nyc_airbnb %>% 
+  lm(price ~ stars * boro + room_type * boro, data = .) %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+```
+
+| term                                |  estimate|  std.error|  statistic|  p.value|
+|:------------------------------------|---------:|----------:|----------:|--------:|
+| (Intercept)                         |    95.694|     19.184|      4.988|    0.000|
+| stars                               |    27.110|      3.965|      6.838|    0.000|
+| boroBrooklyn                        |   -26.066|     25.080|     -1.039|    0.299|
+| boroQueens                          |    -4.118|     40.674|     -0.101|    0.919|
+| boroBronx                           |    -5.627|     77.808|     -0.072|    0.942|
+| room\_typePrivate room              |  -124.188|      2.996|    -41.457|    0.000|
+| room\_typeShared room               |  -153.635|      8.692|    -17.676|    0.000|
+| stars:boroBrooklyn                  |    -6.139|      5.237|     -1.172|    0.241|
+| stars:boroQueens                    |   -17.455|      8.539|     -2.044|    0.041|
+| stars:boroBronx                     |   -22.664|     17.099|     -1.325|    0.185|
+| boroBrooklyn:room\_typePrivate room |    31.965|      4.328|      7.386|    0.000|
+| boroQueens:room\_typePrivate room   |    54.933|      7.459|      7.365|    0.000|
+| boroBronx:room\_typePrivate room    |    71.273|     18.002|      3.959|    0.000|
+| boroBrooklyn:room\_typeShared room  |    47.797|     13.895|      3.440|    0.001|
+| boroQueens:room\_typeShared room    |    58.662|     17.897|      3.278|    0.001|
+| boroBronx:room\_typeShared room     |    83.089|     42.451|      1.957|    0.050|
+
+``` r
+# The '*' shows an interaction term - Effect measure modification
+
+# 
+```
+
+Nesting and then fitting
+
+``` r
+nest_lm_res =
+  nyc_airbnb %>% 
+  group_by(boro) %>% 
+  nest() %>% 
+
+  # The above step created a dataset specific to each of the 4 boros that he's interested in.
+  # Let me start with the original dataset, group by 'boro' and then collapse all of the non- 'boro' variables inside of the Bronx, inside of Queens, inside of Brooklyn, inside of Manhatttan 
+  
+  mutate(models = map(data, ~lm(price ~ stars + room_type, data = .x)),
+         models = map(models, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest()
+```
