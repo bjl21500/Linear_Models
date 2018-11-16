@@ -10318,7 +10318,10 @@ nyc_airbnb =
   nyc_airbnb %>% 
   mutate(boro = fct_infreq(boro),
          room_type = fct_infreq(room_type))
-# First converting boro into a factor and is putting it in order of frequency rather than in alphabetical order.# Most common room_type will be reference category.
+
+# First converting boro into a factor and is putting it in order of frequency rather than in alphabetical order.
+
+# Most common room_type will be reference category.
 
 fit = lm(price ~ stars + boro, data = nyc_airbnb)
 
@@ -20537,7 +20540,7 @@ modelr::add_residuals(nyc_airbnb, fit) %>%
 ![](Linear_Models_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ``` r
-#add_residulas - 1st argument into the function is the dataset thatI want to operate on
+#add_residulas - 1st argument into the function is the dataset that I want to operate on
 # 2nd argument is the model to add residuals for
 
 modelr::add_residuals(nyc_airbnb, fit) %>%
@@ -20586,7 +20589,7 @@ fit_null = lm(price ~ stars + boro, data = nyc_airbnb)
 
 fit_alt = lm(price ~ stars + boro + room_type, data  = nyc_airbnb)
 
-# 
+# The null model is nested within the alternative model because the alternative model starts at the null model and adds two terms to it
 
 anova(fit_null, fit_alt) %>%
   broom::tidy()
@@ -20599,3 +20602,7 @@ anova(fit_null, fit_alt) %>%
     ## *  <dbl>       <dbl> <dbl>     <dbl>     <dbl>   <dbl>
     ## 1  30525 1005601724.    NA       NA        NA       NA
     ## 2  30523  921447496.     2 84154228.     1394.       0
+
+``` r
+# Can only use ANOVA to compare nested models
+```

@@ -52,6 +52,7 @@ fitted.values(fit)
 Look at better summaries.
 ```{r}
 broom::tidy(fit)
+
 # Spits this in a manner that is a dataframe.
 # Can do some data manipulation if I want.
 
@@ -79,7 +80,10 @@ nyc_airbnb =
   nyc_airbnb %>% 
   mutate(boro = fct_infreq(boro),
          room_type = fct_infreq(room_type))
-# First converting boro into a factor and is putting it in order of frequency rather than in alphabetical order.# Most common room_type will be reference category.
+
+# First converting boro into a factor and is putting it in order of frequency rather than in alphabetical order.
+
+# Most common room_type will be reference category.
 
 fit = lm(price ~ stars + boro, data = nyc_airbnb)
 
@@ -99,7 +103,7 @@ fitted.values(fit)
 modelr::add_residuals(nyc_airbnb, fit) %>%
   ggplot(aes(x = boro, y =resid)) + geom_boxplot()
 
-#add_residulas - 1st argument into the function is the dataset thatI want to operate on
+#add_residulas - 1st argument into the function is the dataset that I want to operate on
 # 2nd argument is the model to add residuals for
 
 modelr::add_residuals(nyc_airbnb, fit) %>%
@@ -108,6 +112,7 @@ modelr::add_residuals(nyc_airbnb, fit) %>%
 
 modelr::add_predictions(nyc_airbnb, fit) %>%
   ggplot(aes(x = stars, y =pred, color = boro)) + geom_point()
+
 # This shows the fitted values that go along with this thing; not the residuals any more
 ```
 
@@ -126,12 +131,13 @@ fit_null = lm(price ~ stars + boro, data = nyc_airbnb)
 
 fit_alt = lm(price ~ stars + boro + room_type, data  = nyc_airbnb)
 
-# 
+# The null model is nested within the alternative model because the alternative model starts at the null model and adds two terms to it
 
 anova(fit_null, fit_alt) %>%
   broom::tidy()
-```
 
+# Can only use ANOVA to compare nested models
+```
 
 
 
