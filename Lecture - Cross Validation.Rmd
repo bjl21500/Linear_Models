@@ -7,9 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
 
 install.packages("mgcv")
-
+```{r}
 library(tidyverse)
 library(modelr)
 library(mgcv)
@@ -25,8 +27,11 @@ nonlin_df = tibble(
 )
 
 ggplot(nonlin_df, aes(x = x, y = y)) + geom_point() + theme_bw()
+
+# 100 rows within this dataset
+# Is easier to use a non-linear fit because it's easy to see what complexity looks like if all I have is an X and Y variable.
 ```
-Parition 
+Parition into training and testing.
 
 ```{r}
 train_df = sample_n(nonlin_df, 80)
@@ -35,11 +40,17 @@ test_df = anti_join(nonlin_df, train_df, by = "id")
 ggplot(train_df, aes(x = x, y = y)) + 
   geom_point() + 
   geom_point(data = test_df, color = "red")
+
+# Black points are in my training dataset
+# Red points are in my testing dataset
+# Use the black piints to fit a model and see how well the models predict the points in red
 ```
 
 Fit a few models
 
 ```{r}
+# lm - linear model fit
+# mgcv::gam fits a smooth curve through the linear model.
 lin_mod = lm(y ~ x, data = train_df)
 
 nonlin_mod = mgcv::gam(y ~ s(x), data = train_df)
@@ -57,7 +68,7 @@ train_df %>%
   geom_line(aes(y = pred), color = "red")
 ```
 
-
+Make all the plots together.
 ```{r}
 train_df %>% 
   gather_predictions(lin_mod, nonlin_mod, wiggly_mod) %>% 
@@ -70,17 +81,31 @@ train_df %>%
 
 ```{r}
 rmse(lin_mod, test_df)
+rmse(nonlin_mod, test_df)
+rmse(wiggly_mod, test_df)
+
+# This function: 1st model that I care about
+# 2nd - the dataset that I want 'rmse' to be calculated on.
 ```
 
 Iterations
 ```{r}
 cv_df = 
   crossv_mc(nonlin_df, 100) 
-# Is a list
+
+# Is a list witin train and test columns
+# Crossvaldatin_mc
+# Will make 100 numbers of splits based on the dataset that I select (here is nonlin_df)
+# Will split 80-20 split by default
+# By default - Training will have 80% of my data
+# testing will have 20%
 ```
 
 ```{r}
 cv_df %>% pull(train) %>% . [[1]] %>%as_tibble()
+
+# Is looking at 1st element of training dataset.
+# As_tibble function converts the above to a dataframe
 ```
 
 ```{r}
@@ -88,13 +113,20 @@ cv_df =
   cv_df %>% 
   mutate(train = map(train, as_tibble),
          test = map(test, as_tibble))
+
+# Will replace each of my training dataset with the as_tibble version of those datasets. 
 ```
+
+ 
 
 ```{r}
-cv_df = 
-  cv_df %>% 
-  mutate(lin_mod    = map(train, ~lm(y ~ x, data = .x)),
+cv_df = cv_df %>% 
+  mutate(lin_mod = map(train, ~lm(y ~ x, data = .x)),
          nonlin_mod = map(train, ~mgcv::gam(y ~ s(x), data = .x)),
          wiggly_mod = map(train, ~gam(y ~ s(x, k = 30), sp = 10e-6, data = .x))) 
+
+# Want to fit a linear model over all 100 training datasets.
+# Fitting 3 different models to all 100 of my datasets.
 ```
 
+Using map2_dbl returns a number if, through mapping, the new column in one number [1].
